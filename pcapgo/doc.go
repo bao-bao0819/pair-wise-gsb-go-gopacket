@@ -13,6 +13,7 @@ This package contains implementations for native PCAP support. Currently support
 
   - pcap-files read/write: Reader, Writer
   - pcapng-files read/write: NgReader, NgWriter
+  - uncompressed pcapng-files random access: NgIndex
   - raw socket capture (linux only): EthernetHandle
 
 # Basic Usage pcapng
@@ -36,6 +37,18 @@ supported (which means PacketDataSource and ZeroCopyPacketDataSource is supporte
 
 	data, ci, err := r.ReadPacketData()
 	...
+
+For random access to an uncompressed pcapng file (for example to read only a few
+seconds of a large capture) use NgIndex, which is built once from an
+io.ReaderAt and a length and then answers stateless, interleavable lookups
+without rescanning the file:
+
+	idx, err := NewNgIndex(f, size, DefaultNgIndexOptions)
+	...
+	numbers := idx.PacketNumbersBetween(start, end) // half-open [start, end)
+	data, ci, err := idx.ReadPacketData(numbers[0])
+
+Gzip compressed input is rejected by NewNgIndex.
 
 Write supports only little endian, enhanced packets blocks, interface blocks, and interface statistics
 blocks. The same options as with writing are supported. Interface timestamp resolution is fixed to
