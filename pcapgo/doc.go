@@ -23,6 +23,11 @@ the options also by Wireshark are supported. The default reader options match li
 a look at NgReaderOptions for more advanced usage. Both ReadPacketData and ZeroCopyReadPacketData is
 supported (which means PacketDataSource and ZeroCopyPacketDataSource is supported).
 
+For uncompressed pcapng files that implement io.ReaderAt, NewNgIndex builds a read-only index that
+preserves each packet's section-local interface context. The index supports packet-number lookups and
+timestamp-range queries without assuming timestamps increase. ReadPacketDataAt and ReadPacketDataBetween
+read packets directly from saved file offsets.
+
 	f, err := os.Open("somefile.pcapng")
 	if err != nil {
 		...
